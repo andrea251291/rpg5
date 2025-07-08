@@ -2,21 +2,33 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<title>Mini Mappa Pokémon-style</title>
+<title>Mini Mappa – Stile Pokémon</title>
 <style>
-  body { margin:0; background:#000; display:flex; justify-content:center; align-items:center; height:100vh; }
-  #game { border:1px solid #555; image-rendering:pixelated; }
-  #message { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(0,0,0,0.8); color:#fff; padding:20px; font-size:24px; display:none; }
+  /*  layout di base  */
+  html,body{margin:0;height:100%;background:#000;display:flex;justify-content:center;align-items:center}
+  #game{border:1px solid #555;image-rendering:pixelated}
+  #message{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.8);color:#fff;padding:20px;font-size:24px;display:none}
 </style>
 </head>
 <body>
 <canvas id="game" width="320" height="160"></canvas>
+<!--
+  Sostituisci "tileset.png" e "player.png" con i tuoi sprite.
+  ⚠️  tileset.png → riga orizzontale di 3 tile 16×16 px nell’ordine: pavimento, roccia, uscita.
+  ⚠️  player.png  → riga orizzontale di 3 frame 16×16 px (animazione passo) rivolti in basso.
+-->
+<img id="tileset" src="tileset.png" hidden>
+<img id="playerSprite" src="player.png" hidden>
+
 <div id="message">Livello superato</div>
 <script>
-const tileSize = 16;
-const mapWidth = 20;
-const mapHeight = 10;
-// 0: pavimento, 1: muro, 2: uscita
+/******************
+ * Costanti       *
+ ******************/
+const tileSize   = 16;
+const mapWidth   = 20;
+const mapHeight  = 10;
+// 0: pavimento | 1: roccia | 2: uscita
 const map = [
   [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
   [1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1],
@@ -29,42 +41,89 @@ const map = [
   [0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,2],
   [0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1]
 ];
-let player = {x:0, y:8};
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
-const message = document.getElementById('message');
 
-function draw() {
-  for(let y=0; y<mapHeight; y++) {
-    for(let x=0; x<mapWidth; x++) {
-      const tile = map[y][x];
-      if(tile === 1) ctx.fillStyle = '#444';
-      else if(tile === 2) ctx.fillStyle = '#0f0';
-      else ctx.fillStyle = '#ccc';
-      ctx.fillRect(x*tileSize, y*tileSize, tileSize, tileSize);
+/******************
+ * Stato Giocatore*
+ ******************/
+const player = { x:0, y:8, frame:0, dir:'down', animTick:0 };
+
+/******************
+ * Canvas & Img   *
+ ******************/
+const canvas   = document.getElementById('game');
+const ctx      = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false; // mantiene i pixel netti
+
+const tileset  = document.getElementById('tileset');
+const playerImg= document.getElementById('playerSprite');
+const message  = document.getElementById('message');
+
+// mappa indice→colonna sul tileset
+const tileIdx = { 0:0, 1:1, 2:2 };
+
+/******************
+ * Disegno         *
+ ******************/
+function drawMap(){
+  for(let y=0;y<mapHeight;y++){
+    for(let x=0;x<mapWidth;x++){
+      const t = map[y][x];
+      const sx = tileIdx[t]*tileSize;
+      ctx.drawImage(tileset, sx, 0, tileSize, tileSize, x*tileSize, y*tileSize, tileSize, tileSize);
     }
   }
-  ctx.fillStyle = '#ff0';
-  ctx.fillRect(player.x*tileSize, player.y*tileSize, tileSize, tileSize);
 }
 
-draw();
+function drawPlayer(){
+  // tre frame consecutivi (0,1,2) sulla stessa riga
+  ctx.drawImage(playerImg, player.frame*tileSize, 0, tileSize, tileSize,
+                player.x*tileSize, player.y*tileSize, tileSize, tileSize);
+}
 
-document.addEventListener('keydown', e => {
-  let nx = player.x;
-  let ny = player.y;
-  if(e.key === 'ArrowUp') ny--;
-  if(e.key === 'ArrowDown') ny++;
-  if(e.key === 'ArrowLeft') nx--;
-  if(e.key === 'ArrowRight') nx++;
-  if(nx < 0 || nx >= mapWidth || ny < 0 || ny >= mapHeight) return;
-  if(map[ny][nx] === 1) return;
-  player.x = nx; player.y = ny;
-  if(map[ny][nx] === 2) {
-    message.style.display = 'block';
+function render(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  drawMap();
+  drawPlayer();
+}
+
+/******************
+ * Input Tastiera  *
+ ******************/
+document.addEventListener('keydown', e=>{
+  const {x,y}=player;
+  let nx=x, ny=y;
+  if(e.key==='ArrowUp')   ny--;
+  if(e.key==='ArrowDown') ny++;
+  if(e.key==='ArrowLeft') nx--;
+  if(e.key==='ArrowRight')nx++;
+
+  if(nx<0||nx>=mapWidth||ny<0||ny>=mapHeight) return;          // bordo
+  if(map[ny][nx]===1) return;                                   // roccia
+
+  player.x=nx; player.y=ny;
+
+  // semplice animazione a 2 frame
+  player.frame = (player.frame+1)%2;
+
+  if(map[ny][nx]===2){
+    message.style.display='block';
   }
-  draw();
+  render();
 });
+
+/******************
+ * Avvio           *
+ ******************/
+function start(){
+  if(tileset.complete && playerImg.complete){
+    render();
+  } else {
+    // aspetta il caricamento delle immagini
+    tileset.onload=start;
+    playerImg.onload=start;
+  }
+}
+start();
 </script>
 </body>
 </html>
