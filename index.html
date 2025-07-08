@@ -72,7 +72,7 @@ function resizeCanvas(){
   tileSize = Math.floor(Math.min(sw / mapWidth, sh / mapHeight));
   canvas.width = tileSize * mapWidth;
   canvas.height = tileSize * mapHeight;
-  radiusDefault = tileSize * 2;
+  radiusDefault = 0;
   if(darkness) currentRadius = radiusDefault;
   render();
 }
@@ -89,7 +89,7 @@ const tileIdx = { 0:0, 1:1, 2:2 };
  * Flash Dynamics *
  ******************/
 let darkness = true;               // tunnel buio di default
-let radiusDefault = 32;            // raggio standard (~2 tile)
+let radiusDefault = 0;             // nessuna visibilità senza "flash"
 const radiusFlash   = 160;         // raggio quando il flash è attivo
 let currentRadius   = radiusDefault;
 
@@ -139,8 +139,8 @@ function render(){
 document.addEventListener('keydown', e=>{
   const {x,y}=player;
   if(e.key==='f' || e.key==='F'){
-    // con F si amplia temporaneamente il raggio di visibilità senza mostrare l'intera mappa
-    currentRadius = (currentRadius === radiusDefault) ? radiusFlash : radiusDefault;
+    // con F si illumina temporaneamente l'area attorno al giocatore
+    currentRadius = radiusFlash;
     render();
     return;                                           // evita altro input
   }
@@ -163,6 +163,13 @@ document.addEventListener('keydown', e=>{
     message.style.display='block';
   }
   render();
+});
+
+document.addEventListener('keyup', e=>{
+  if(e.key==='f' || e.key==='F'){
+    currentRadius = radiusDefault;
+    render();
+  }
 });
 
 /******************
