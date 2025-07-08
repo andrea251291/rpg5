@@ -62,6 +62,14 @@ const message  = document.getElementById('message');
 const tileIdx = { 0:0, 1:1, 2:2 };
 
 /******************
+ * Flash Dynamics *
+ ******************/
+let darkness = true;               // tunnel buio di default
+const radiusDefault = 32;          // raggio standard (~2 tile)
+const radiusFlash   = 160;         // raggio quando il flash è attivo
+let currentRadius   = radiusDefault;
+
+/******************
  * Disegno         *
  ******************/
 function drawMap(){
@@ -80,10 +88,25 @@ function drawPlayer(){
                 player.x*tileSize, player.y*tileSize, tileSize, tileSize);
 }
 
+function drawDarkness(){
+  if(!darkness) return;                     // se il flash è attivo non disegnare l'oscurità
+  ctx.fillStyle = 'rgba(0,0,0,0.85)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.save();
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.beginPath();
+  ctx.arc(player.x*tileSize + tileSize/2, player.y*tileSize + tileSize/2,
+          currentRadius, 0, Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+}
+
 function render(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
   drawMap();
   drawPlayer();
+  drawDarkness();
 }
 
 /******************
@@ -91,6 +114,13 @@ function render(){
  ******************/
 document.addEventListener('keydown', e=>{
   const {x,y}=player;
+  if(e.key==='f' || e.key==='F'){
+    darkness = !darkness;                              // attiva/disattiva il flash
+    currentRadius = darkness ? radiusDefault : radiusFlash;
+    render();
+    return;                                           // evita altro input
+  }
+
   let nx=x, ny=y;
   if(e.key==='ArrowUp')   ny--;
   if(e.key==='ArrowDown') ny++;
