@@ -141,9 +141,9 @@ function render(){
 document.addEventListener('keydown', e=>{
   const {x,y}=player;
   if(e.key==='f' || e.key==='F'){
-    // la pressione di F attiva/disattiva la torcia
-    torchOn = !torchOn;
-    currentRadius = torchOn ? radiusFlash : radiusDefault;
+    // tenendo premuto F accendi la torcia
+    torchOn = true;
+    currentRadius = radiusFlash;
     render();
     return;                                           // evita altro input
   }
@@ -168,7 +168,13 @@ document.addEventListener('keydown', e=>{
   render();
 });
 
-// nessun evento keyup necessario per la torcia
+document.addEventListener('keyup', e=>{
+  if(e.key==='f' || e.key==='F'){
+    torchOn = false;                       // rilasciando F spegni la torcia
+    currentRadius = radiusDefault;
+    render();
+  }
+});
 
 /******************
  * Avvio           *
