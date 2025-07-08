@@ -94,6 +94,12 @@ const radiusFlash   = 160;         // raggio quando la torcia è accesa
 let currentRadius   = radiusDefault;
 let torchOn         = false;       // stato della torcia
 
+function toggleTorch(){
+  torchOn = !torchOn;
+  currentRadius = torchOn ? radiusFlash : radiusDefault;
+  render();
+}
+
 /******************
  * Disegno         *
  ******************/
@@ -140,11 +146,8 @@ function render(){
  ******************/
 document.addEventListener('keydown', e=>{
   const {x,y}=player;
-  if(e.key==='f' || e.key==='F'){
-    // premendo F alterna l'accensione della torcia
-    torchOn = !torchOn;
-    currentRadius = torchOn ? radiusFlash : radiusDefault;
-    render();
+  if(e.key && e.key.toLowerCase()==='f'){
+    toggleTorch();
     return;                                           // evita altro input
   }
 
@@ -167,6 +170,9 @@ document.addEventListener('keydown', e=>{
   }
   render();
 });
+
+// abilita la torcia anche tramite click
+canvas.addEventListener('mousedown', toggleTorch);
 
 document.addEventListener('keyup', e=>{
   // il rilascio dei tasti non gestisce più l'accensione della torcia
