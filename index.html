@@ -89,9 +89,10 @@ const tileIdx = { 0:0, 1:1, 2:2 };
  * Flash Dynamics *
  ******************/
 let darkness = true;               // tunnel buio di default
-let radiusDefault = 0;             // nessuna visibilità senza "flash"
-const radiusFlash   = 160;         // raggio quando il flash è attivo
+let radiusDefault = 0;             // nessuna visibilità senza "torcia"
+const radiusFlash   = 160;         // raggio quando la torcia è accesa
 let currentRadius   = radiusDefault;
+let torchOn         = false;       // stato della torcia
 
 /******************
  * Disegno         *
@@ -114,7 +115,7 @@ function drawPlayer(){
 
 function drawDarkness(){
   if(!darkness) return;                     // nel caso l'oscurità sia disabilitata
-  ctx.fillStyle = 'rgba(0,0,0,0.85)';
+  ctx.fillStyle = 'rgba(0,0,0,1)';        // mappa completamente nascosta
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   ctx.save();
@@ -140,8 +141,9 @@ function render(){
 document.addEventListener('keydown', e=>{
   const {x,y}=player;
   if(e.key==='f' || e.key==='F'){
-    // con F si illumina temporaneamente l'area attorno al giocatore
-    currentRadius = radiusFlash;
+    // la pressione di F attiva/disattiva la torcia
+    torchOn = !torchOn;
+    currentRadius = torchOn ? radiusFlash : radiusDefault;
     render();
     return;                                           // evita altro input
   }
@@ -166,12 +168,7 @@ document.addEventListener('keydown', e=>{
   render();
 });
 
-document.addEventListener('keyup', e=>{
-  if(e.key==='f' || e.key==='F'){
-    currentRadius = radiusDefault;
-    render();
-  }
-});
+// nessun evento keyup necessario per la torcia
 
 /******************
  * Avvio           *
