@@ -26,7 +26,8 @@
 /******************
  * Costanti       *
  ******************/
-let tileSize   = 16;
+const spriteSize = 16; // dimensione dei tile nel tileset
+let tileSize   = spriteSize; // dimensione dei tile sul canvas
 const mapWidth   = 10;
 const mapHeight  = 20;
 // 0: pavimento | 1: roccia | 2: uscita
@@ -99,15 +100,15 @@ function drawMap(){
   for(let y=0;y<mapHeight;y++){
     for(let x=0;x<mapWidth;x++){
       const t = map[y][x];
-      const sx = tileIdx[t]*tileSize;
-      ctx.drawImage(tileset, sx, 0, tileSize, tileSize, x*tileSize, y*tileSize, tileSize, tileSize);
+      const sx = tileIdx[t]*spriteSize;
+      ctx.drawImage(tileset, sx, 0, spriteSize, spriteSize, x*tileSize, y*tileSize, tileSize, tileSize);
     }
   }
 }
 
 function drawPlayer(){
   // tre frame consecutivi (0,1,2) sulla stessa riga
-  ctx.drawImage(playerImg, player.frame*tileSize, 0, tileSize, tileSize,
+  ctx.drawImage(playerImg, player.frame*spriteSize, 0, spriteSize, spriteSize,
                 player.x*tileSize, player.y*tileSize, tileSize, tileSize);
 }
 
