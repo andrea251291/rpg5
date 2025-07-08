@@ -73,7 +73,7 @@ function resizeCanvas(){
   canvas.width = tileSize * mapWidth;
   canvas.height = tileSize * mapHeight;
   radiusDefault = 0;
-  if(darkness) currentRadius = radiusDefault;
+  if(darkness) currentRadius = torchOn ? radiusFlash : radiusDefault;
   render();
 }
 window.addEventListener('resize', resizeCanvas);
