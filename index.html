@@ -119,6 +119,7 @@ function drawDarkness(){
 
   ctx.save();
   ctx.globalCompositeOperation = 'destination-out';
+  ctx.fillStyle = 'rgba(0,0,0,1)';        // rimuove completamente l'overlay
   ctx.beginPath();
   ctx.arc(player.x*tileSize + tileSize/2, player.y*tileSize + tileSize/2,
           currentRadius, 0, Math.PI*2);
