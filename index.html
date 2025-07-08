@@ -113,7 +113,7 @@ function drawPlayer(){
 }
 
 function drawDarkness(){
-  if(!darkness) return;                     // se il flash è attivo non disegnare l'oscurità
+  if(!darkness) return;                     // nel caso l'oscurità sia disabilitata
   ctx.fillStyle = 'rgba(0,0,0,0.85)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -139,8 +139,8 @@ function render(){
 document.addEventListener('keydown', e=>{
   const {x,y}=player;
   if(e.key==='f' || e.key==='F'){
-    darkness = !darkness;                              // attiva/disattiva il flash
-    currentRadius = darkness ? radiusDefault : radiusFlash;
+    // con F si amplia temporaneamente il raggio di visibilità senza mostrare l'intera mappa
+    currentRadius = (currentRadius === radiusDefault) ? radiusFlash : radiusDefault;
     render();
     return;                                           // evita altro input
   }
