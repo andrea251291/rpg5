@@ -2,6 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Mini Mappa – Stile Pokémon</title>
 <style>
   /*  layout di base  */
@@ -11,7 +12,7 @@
 </style>
 </head>
 <body>
-<canvas id="game" width="320" height="160"></canvas>
+<canvas id="game"></canvas>
 <!--
   Sostituisci "tileset.png" e "player.png" con i tuoi sprite.
   ⚠️  tileset.png → riga orizzontale di 3 tile 16×16 px nell’ordine: pavimento, roccia, uscita.
@@ -25,27 +26,37 @@
 /******************
  * Costanti       *
  ******************/
-const tileSize   = 16;
-const mapWidth   = 20;
-const mapHeight  = 10;
+let tileSize   = 16;
+const mapWidth   = 10;
+const mapHeight  = 20;
 // 0: pavimento | 1: roccia | 2: uscita
 const map = [
-  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-  [1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1],
-  [0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,1],
-  [0,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,0,1],
-  [0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,1,0,1],
-  [0,1,0,1,0,1,1,1,1,1,1,1,1,1,0,1,0,1,0,1],
-  [0,1,0,1,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,1],
-  [0,1,0,1,1,1,1,1,1,1,1,1,0,1,0,1,0,1,0,1],
-  [0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,2],
-  [0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1]
+  [0,0,0,0,0,0,0,0,1,0],
+  [1,1,1,1,1,1,1,0,1,0],
+  [1,0,0,0,0,0,1,0,1,0],
+  [1,0,1,1,1,0,1,0,1,0],
+  [1,0,1,0,0,0,1,0,1,0],
+  [1,0,1,0,1,1,1,0,1,0],
+  [1,0,1,0,1,0,0,0,1,0],
+  [1,0,1,0,1,0,1,1,1,0],
+  [1,0,1,0,1,0,1,0,0,0],
+  [1,0,1,0,1,0,1,0,1,0],
+  [0,0,1,0,1,0,1,0,1,0],
+  [1,1,1,0,1,0,1,0,1,0],
+  [1,0,0,0,1,0,1,0,1,0],
+  [1,0,1,1,1,0,1,0,1,0],
+  [1,0,0,0,0,0,1,0,1,0],
+  [1,0,1,1,1,1,1,0,1,0],
+  [1,0,0,0,0,0,0,0,1,0],
+  [1,1,1,1,1,1,1,1,1,0],
+  [1,0,0,0,0,0,0,0,0,0],
+  [1,2,1,1,1,1,1,1,1,1]
 ];
 
 /******************
  * Stato Giocatore*
  ******************/
-const player = { x:0, y:8, frame:0, dir:'down', animTick:0 };
+const player = { x:1, y:0, frame:0, dir:'down', animTick:0 };
 
 /******************
  * Canvas & Img   *
@@ -53,6 +64,18 @@ const player = { x:0, y:8, frame:0, dir:'down', animTick:0 };
 const canvas   = document.getElementById('game');
 const ctx      = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false; // mantiene i pixel netti
+
+function resizeCanvas(){
+  const sw = window.innerWidth;
+  const sh = window.innerHeight;
+  tileSize = Math.floor(Math.min(sw / mapWidth, sh / mapHeight));
+  canvas.width = tileSize * mapWidth;
+  canvas.height = tileSize * mapHeight;
+  radiusDefault = tileSize * 2;
+  if(darkness) currentRadius = radiusDefault;
+  render();
+}
+window.addEventListener('resize', resizeCanvas);
 
 const tileset  = document.getElementById('tileset');
 const playerImg= document.getElementById('playerSprite');
@@ -65,7 +88,7 @@ const tileIdx = { 0:0, 1:1, 2:2 };
  * Flash Dynamics *
  ******************/
 let darkness = true;               // tunnel buio di default
-const radiusDefault = 32;          // raggio standard (~2 tile)
+let radiusDefault = 32;            // raggio standard (~2 tile)
 const radiusFlash   = 160;         // raggio quando il flash è attivo
 let currentRadius   = radiusDefault;
 
@@ -146,6 +169,7 @@ document.addEventListener('keydown', e=>{
  ******************/
 function start(){
   if(tileset.complete && playerImg.complete){
+    resizeCanvas();
     render();
   } else {
     // aspetta il caricamento delle immagini
@@ -154,6 +178,11 @@ function start(){
   }
 }
 start();
+document.addEventListener('keydown',()=>{
+  if(!document.fullscreenElement){
+    canvas.requestFullscreen().catch(()=>{});
+  }
+},{once:true});
 </script>
 </body>
 </html>
